@@ -32,15 +32,12 @@ GCID = GCID_int.to_bytes(16 + len_private, 'big')
 
 print("Made GCID:\n{}\n".format(GCID))
 
-print("\n\n\n")
 
+'''
+<<Step2：VCLの作成>>
 
-#鍵の確認
-print("private key:\n%s" %(private_key.export_key('DER')))
+'''
 
-print("\n\n")
-
-print("public key:\n%s" %(public_key.export_key('DER')))
 
 
 
