@@ -1,4 +1,5 @@
-#randomとRSAとPKCS1のライブラリ導入
+#pdbとrandomとRSAとPKCS1のライブラリ導入
+import pdb
 import random
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
@@ -23,8 +24,10 @@ len_private = len(private_key.export_key('DER')) #len_private：秘密鍵のbyte
 #秘密鍵に基づく公開鍵の生成
 public_key = private_key.publickey()
 
+pdb.set_trace()
+
 #GCID(bytes)の作成
-GCID_int = int.from_bytes(gcid_plain, 'big') << (len_private * 8) | int.from_bytes(private_key.export_key('DER'), 'big') #gcid_plainの後に秘密鍵をくっつける
+GCID_int = (int.from_bytes(gcid_plain, 'big') << (len_private * 8)) | int.from_bytes(private_key.export_key('DER'), 'big') #gcid_plainの後に秘密鍵をくっつける
 
 GCID = GCID_int.to_bytes(16 + len_private, 'big')
 
@@ -55,7 +58,7 @@ vcid_plain = int.from_bytes(vcid_upper, 'big') << (len_sequence * 8) | int.from_
 result
 
 
-12205 GCID bytes型で実装完了！！！！
+1205 GCID bytes型で実装完了！！！！
 
 
 
