@@ -15,7 +15,8 @@ from Crypto.Cipher import PKCS1_OAEP
 
 
 #平文（GCIDの上位128bit,type:bytes）の作成
-gcid_plain = random.randrange(2 ** 128).to_bytes(16, 'big')
+len_gcid_upper = 16
+gcid_upper = random.randrange(2 ** 128).to_bytes(len_gcid_upper, 'big')
 
 #秘密鍵の作成
 private_key = RSA.generate(2048)
@@ -25,9 +26,9 @@ len_private = len(private_key.export_key('DER')) #len_private：秘密鍵のbyte
 public_key = private_key.publickey()
 
 #GCID(bytes)の作成
-GCID_int = (int.from_bytes(gcid_plain, 'big') << (len_private * 8)) | int.from_bytes(private_key.export_key('DER'), 'big') #gcid_plainの後に秘密鍵をくっつける
+GCID_int = (int.from_bytes(gcid_upper, 'big') << (len_private * 8)) | int.from_bytes(private_key.export_key('DER'), 'big') #gcid_upperの後に秘密鍵をくっつける
 
-GCID = GCID_int.to_bytes(16 + len_private, 'big')
+GCID = GCID_int.to_bytes(len_gcid_upper + len_private, 'big')
 
 #GCIDの出力
 
@@ -55,7 +56,7 @@ len_sequence = 16
 sequence = random.randrange(2 ** (len_sequence * 8)).to_bytes(16, 'big')
 
 #平文（上位128bitとシーケンスの合計）の作成
-vcid_plain_int = int.from_bytes(vcid_upper, 'big') << (len_sequence * 8) | int.from_bytes(sequence, 'big') #vcid_plain（int型）の作成)
+vcid_plain_int = (int.from_bytes(vcid_upper, 'big') << (len_sequence * 8)) | int.from_bytes(sequence, 'big') #vcid_plain（int型）の作成)
 vcid_plain = vcid_plain_int.to_bytes(16 + len_sequence, 'big')
 
 #暗号文の作成
