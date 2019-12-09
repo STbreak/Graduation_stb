@@ -18,7 +18,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.sendall(b'I want you to make VCL.')
     # ネットワークのバッファサイズは1024。サーバからの文字列を取得する
     VCID = s.recv(2048)
-    print(repr(VCID))
+    print("MADE VCID:\n" + VCID.hex())
             
 
 
