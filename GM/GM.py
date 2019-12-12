@@ -11,12 +11,25 @@ from Crypto.Cipher import PKCS1_OAEP
 
 '''
 
+#CSからGCIDを貰う
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     # サーバを指定
     s.connect(('127.0.0.1', 10001))
     # サーバにメッセージを送る
-    s.sendall(b'I want you to make VCL.')
+    s.sendall(b'I want you to give GCID.')
     # ネットワークのバッファサイズは1024。サーバからの文字列を取得する
+    GCID = s.recv(2048)
+    print("Got GCID:\n" + GCID.hex())
+
+#CSにGCIDを送ってそれを元にしたVCLを作って貰う
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    # サーバを指定
+    s.connect(('127.0.0.1', 10002))
+    # サーバにGCIDを送る
+    s.sendall(GCID)
+    # ネットワークのバッファサイズは2048。サーバからVCIDを取得する
     VCID = s.recv(2048)
     print("MADE VCID:\n" + VCID.hex())
             
@@ -26,7 +39,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 # Clientの要求待ち            
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
     # IPアドレスとポートを指定
-    s2.bind(('127.0.0.1', 10002))
+    s2.bind(('127.0.0.1', 10003))
     # 1 接続
     s2.listen(1)
     # connectionするまで待つ

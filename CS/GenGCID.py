@@ -41,7 +41,9 @@ print("Done：GCID生成\n")
 <<Step4：socket通信の導入>>
  
 '''
- 
+
+
+#ClientにGCIDを渡す
  
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     # IPアドレスとポートを指定
@@ -62,6 +64,30 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 conn.sendall(GCID)
                 break
         break
+
+#GMにGCIDを渡す
+
+
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    # IPアドレスとポートを指定
+    s.bind(('127.0.0.1', 10001))
+    # 1 接続
+    s.listen(1)
+    # connectionするまで待つ
+    while True:
+        # connectionがあればコネクションとアドレスを入れる
+        conn, addr = s.accept()
+        with conn:
+            while True:
+                #データを受け取る
+                data = conn.recv(2048)
+                if not data:
+                    break
+                print('data : {}, addr: {}'.format(data, addr))
+                conn.sendall(GCID)
+                break
+        break
+
 
 '''
 result

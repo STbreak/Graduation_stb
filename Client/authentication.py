@@ -26,12 +26,12 @@ path = "./GCID_List.txt"
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:                                                                                                                                            
     # サーバを指定
-    s2.connect(('127.0.0.1', 10002))
+    s2.connect(('127.0.0.1', 10003))
     # サーバにメッセージを送る
     s2.sendall(b'I want you to give VCL')
      # ネットワークのバッファサイズは1024。サーバからの文字列を取得する
     VCID = s2.recv(2048)
-    print("Got VCID:\n" + VCID)
+    print("Got VCID:\n" + VCID.hex())
 
 
 
@@ -41,6 +41,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
 ・VCIDの暗号文を鍵で復号
 ・認証
 '''
+
+pdb.set_trace()
 
 #GCIDをファイルから読み出す
 with open(path, mode='rb') as f:
@@ -70,6 +72,7 @@ for GCID in GCID_List:
     #認証処理
     if plaintext == vcid_plain_client:
             print("Done：認証")
+            break
     elif plaintest != vcid_plain_client:
             print("認証失敗")
     else:
@@ -77,16 +80,15 @@ for GCID in GCID_List:
 
 
 '''
-
-1208 認証できた！！
-
-
 result
 
-Done：GCID生成
-
-Done：VCID生成
-
-Done：認証
+Got VCID:
+dd43e207ce148dd2b10e66de9cc9d222dafc7741637b3bc4e3874da637e89e20251c2c6972d62ebcba2f1e5cc5b750ed28055acdb58a935851f70f343fa6c41490f29e3687d5f21725bee6c9d8471babb215a4a0178317ca5b82facca5cb304e8d8db4d96723628f099f2e88c7e883c366c6eaa946c8368b95ff42685814d4ab7db70aaa58c7d0cb2898772ebd7f79997cac019a2e13739abe6b486bef3387567eebe6703b835949e7806811359a5bf5378b4d476e7c0db5830a966db5b0782a843997d54c41496a8d65ea45c52ab078cfa098918e515943e52c497e60b7608e231773ecb77746d54900184c2aba1e66365317e914ce2058c3e60da934d3ad9e5d6fc3213beda256f63cf08cf7be872714daea8a09108caae7f3c81e34bdecb8
+Traceback (most recent call last):
+  File "authentication.py", line 55, in <module>
+    private_key_client = RSA.import_key(private_key_client, None)
+  File "/Users/tanakasatoshishi/.pyenv/versions/3.7.0/lib/python3.7/site-packages/Crypto/PublicKey/RSA.py", line 781, in import_key
+    raise ValueError("RSA key format is not supported")
+ValueError: RSA key format is not supported
 
 '''
