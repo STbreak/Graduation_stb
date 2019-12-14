@@ -48,7 +48,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 private_key_bytes = private_key_int.to_bytes(len_private, 'big')
 
                 #秘密鍵の属性をRSAKeyに変換
-                private_key = RSA.import_key(private_key_bytes, None)
+                private_key = RSA.import_key(private_key_bytes, passphrase=None)
 
                 #秘密鍵に基づく公開鍵を作成
                 public_key = private_key.publickey()

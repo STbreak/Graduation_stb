@@ -54,7 +54,7 @@ for GCID in GCID_List:
     private_key_client = private_key_client_int.to_bytes(len_private, 'big')
 
             #秘密鍵の属性をRSAkeyに変換
-    private_key_client = RSA.import_key(private_key_client, None)
+    private_key_client = RSA.import_key(private_key_client, passphrase=None)
 
     #秘密鍵でVCIDを開ける
             #VCIDの暗号文を取得
