@@ -43,6 +43,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 ・合わせて288byteになる
                 '''
 
+                pdb.set_trace()
+
+
                 #GCIDから鍵を取り出す
                 private_key_int = ((int.from_bytes(GCID, 'big') << (len_gcid_upper * 8)) & (2 ** (len_gcid * 8) - 1)) >> (len_gcid_upper * 8)
                 private_key_bytes = private_key_int.to_bytes(len_private, 'big')

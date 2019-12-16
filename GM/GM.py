@@ -13,6 +13,9 @@ from Crypto.Cipher import PKCS1_OAEP
 
 #CSからGCIDを貰う
 
+
+pdb.set_trace()
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     # サーバを指定
     s.connect(('127.0.0.1', 10001))

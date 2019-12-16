@@ -23,9 +23,6 @@ path_w = "./GCID_List.txt"
 
 '''
 
-pdb.set_trace()
-
-
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     # サーバを指定
     s.connect(('127.0.0.1', 10000))
@@ -34,10 +31,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     # ネットワークのバッファサイズは1024。サーバからの文字列を取得する
     GCID = s.recv(2048)
     print("Bought GCID:\n" + GCID.hex())
+    print(len(GCID))
+
+pdb.set_trace()
 
 with open(path_w, mode='ab') as f:
-    f.write(GCID + b'\n')
-
+    f.write(GCID + b',,,')
 
 '''
 
