@@ -33,10 +33,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     print("Bought GCID:\n" + GCID.hex())
     print(len(GCID))
 
-pdb.set_trace()
-
-with open(path_w, mode='ab') as f:
-    f.write(GCID + b',,,')
+#GCIDを文字列としてリストに格納
+with open(path_w, mode='a') as f:
+    f.write(GCID.hex() + '\n')
 
 '''
 

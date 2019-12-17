@@ -100,6 +100,7 @@ len_vcid = len(VCID)
 #Step2の完了
 
 print("Done：VCID生成\n")
+print(len(VCID))
 
 
 #ClientにVCIDを渡す

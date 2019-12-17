@@ -2,13 +2,12 @@
 import socket
 import pdb
 import random
+import binascii
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 
 #グローバル変数のdefine
 len_gcid_upper = 16
-len_private = 1191
-len_gcid = len_gcid_upper + len_private
 len_vcid_upper = 16
 len_sequence = 16
 len_vcid_plain = len_vcid_upper + len_sequence
@@ -42,39 +41,43 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2:
 ・認証
 '''
 
-pdb.set_trace()
-
 #GCIDをファイルから読み出す
-with open(path, mode='rb') as f:
-    GCID_List = f.read().strip(b',,,')
+with open(path, mode='r') as f:
+    GCID_List = f.read().split('\n')
 
 for GCID in GCID_List:
+    #GCIDの型をbytesに戻す
+    GCID = binascii.unhexlify(GCID)
     #GCIDから秘密鍵を取り出す
+    len_gcid = len(GCID)
+    len_private = len_gcid - len_gcid_upper
     private_key_client_int = ((int.from_bytes(GCID, 'big') << (len_gcid_upper * 8)) & (2 ** (len_gcid * 8) - 1)) >> (len_gcid_upper * 8)
     private_key_client = private_key_client_int.to_bytes(len_private, 'big')
 
-            #秘密鍵の属性をRSAkeyに変換
+    #秘密鍵の属性をRSAkeyに変換
     private_key_client = RSA.import_key(private_key_client, passphrase=None)
 
     #秘密鍵でVCIDを開ける
-            #VCIDの暗号文を取得
+    #VCIDの暗号文を取得
     ciphertext_client_int = ((int.from_bytes(VCID, 'big') << (len_vcid_plain * 8)) & (2 ** (len_vcid * 8) - 1)) >> (len_vcid_plain * 8)
     ciphertext_client = ciphertext_client_int.to_bytes(len_vcid - len_vcid_plain, 'big')
 
-            #VCIDの平文を取得
+    #VCIDの平文を取得
     vcid_plain_client_int = int.from_bytes(VCID, 'big') >> ((len_vcid - len_vcid_plain) * 8)
     vcid_plain_client = vcid_plain_client_int.to_bytes(len_vcid_plain, 'big')
 
     #復号処理
     cipher_client = PKCS1_OAEP.new(private_key_client)
-    plaintext = cipher_client.decrypt(ciphertext_client)
 
     #認証処理
+    try:
+        plaintext = cipher_client.decrypt(ciphertext_client)
+    except ValueError:
+        print("認証失敗")
+        continue
     if plaintext == vcid_plain_client:
             print("Done：認証")
             break
-    elif plaintest != vcid_plain_client:
-            print("認証失敗")
     else:
             print("なんらかのerror")
 
