@@ -7,7 +7,7 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 
 #GCIDリストのパス設定
-path = "./GCID_List.txt"
+path = "./GCID_List99.txt"
 
 '''
 <<Step1：GCIDの作成>>

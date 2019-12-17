@@ -17,7 +17,7 @@ len_vcid = len_vcid_plain + len_vcid_cipher
 n = 1
 
 #GCIDリストへのパスの設定
-path = "./GCID_List.txt"
+path = "./GCID_List9999.txt"
 
 '''
 <<Step4：socket通信の導入>>
