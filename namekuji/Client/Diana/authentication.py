@@ -15,6 +15,7 @@ len_vcid_plain = len_vcid_upper + len_sequence
 len_vcid_cipher = 256
 len_vcid = len_vcid_plain + len_vcid_cipher
 n = 1
+flag = False
 
 #GCIDリストへのパスの設定
 path = "./GCID_List999.txt"
@@ -27,6 +28,8 @@ path = "./GCID_List999.txt"
 start = time.time()
 
 for i in range(n):
+    if flag == True:
+        break
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2: 
         # サーバを指定
         s2.connect(('127.0.0.1', 10001 + i))
@@ -81,7 +84,8 @@ for i in range(n):
             print("認証失敗")
             continue
         if plaintext == vcid_plain_client:
-                print("Done：認証")
+                print("Done：認証[{}]".format(i))
+                flag = True
                 break
         else:
                 print("なんらかのerror")

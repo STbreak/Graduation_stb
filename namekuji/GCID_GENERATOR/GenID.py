@@ -8,7 +8,9 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 
 #GCIDリストのパス設定
-path = "./GCID_List9.txt"
+path = "./GCID_List9999.txt"
+
+len_gcid_upper = 16
 
 '''
 <<Step1：GCIDの作成>>
@@ -20,9 +22,8 @@ path = "./GCID_List9.txt"
 
 start = time.time()
 
-for i in range(9):
+for i in range(9999):
     #平文（GCIDの上位128bit,type:bytes）の作成
-    len_gcid_upper = 16
     gcid_upper = random.randrange(2 ** 128).to_bytes(len_gcid_upper, 'big')
 
     #秘密鍵の作成

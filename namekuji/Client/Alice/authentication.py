@@ -14,7 +14,7 @@ len_sequence = 16
 len_vcid_plain = len_vcid_upper + len_sequence
 len_vcid_cipher = 256
 len_vcid = len_vcid_plain + len_vcid_cipher
-n = 1
+n = 100
 
 #GCIDリストへのパスの設定
 path = "./GCID_List.txt"
@@ -81,7 +81,7 @@ for i in range(n):
             print("認証失敗")
             continue
         if plaintext == vcid_plain_client:
-                print("Done：認証")
+                print("Done：認証[{}]".format(i))
                 break
         else:
                 print("なんらかのerror")
