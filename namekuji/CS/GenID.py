@@ -5,6 +5,9 @@ import random
 import binascii
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Hash import SHA384
+from Crypto.Signature import pkcs1_15
+
 
 #GCIDリストのパス設定
 path = "./GCID_List99.txt"
