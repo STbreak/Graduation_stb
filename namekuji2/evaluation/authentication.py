@@ -5,19 +5,25 @@ import random
 import binascii
 import time
 from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA384
+from Crypto.Signature import pkcs1_15
 
 #グローバル変数のdefine
 len_gcid_upper = 16
+len_key = 16
 len_vcid_upper = 16
 len_sequence = 16
-len_vcid_plain = len_vcid_upper + len_sequence
-len_vcid_cipher = 256
-len_vcid = len_vcid_plain + len_vcid_cipher
-n = 100
+len_signature = 256
+len_ciphertext = 288
+len_tag = 16
+len_nonce = 16
+len_vcid_plain = len_vcid_upper + len_sequence + len_signature
+len_vcid = len_vcid_plain + len_ciphertext + len_tag + len_nonce
+n = 10
 
 #GCIDリストへのパスの設定
-path = "./GCID_List.txt"
+path = "../setting/GCID_Lists/GCID_10.txt"
 
 '''
 <<Step4：socket通信の導入>>
@@ -29,7 +35,7 @@ start = time.time()
 for i in range(n):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s2: 
         # サーバを指定
-        s2.connect(('127.0.0.1', 10001 + i))
+        s2.connect(('127.0.0.1', 10000 + i))
         # サーバにメッセージを送る
         s2.sendall(b'I want you to give VCL')
          # ネットワークのバッファサイズは1024。サーバからの文字列を取得する
@@ -53,39 +59,62 @@ for i in range(n):
     for GCID in GCID_List:
         #GCIDの型をbytesに戻す
         GCID = binascii.unhexlify(GCID)
-        #GCIDから秘密鍵を取り出す
+        
+        #GCIDから公開鍵を取り出す
         len_gcid = len(GCID)
-        len_private = len_gcid - len_gcid_upper
-        private_key_client_int = ((int.from_bytes(GCID, 'big') << (len_gcid_upper * 8)) & (2 ** (len_gcid * 8) - 1)) >> (len_gcid_upper * 8)
-        private_key_client = private_key_client_int.to_bytes(len_private, 'big')
+        len_public = len_gcid - len_gcid_upper -len_key
+        public_key_client_int = ((int.from_bytes(GCID, 'big') << ((len_gcid_upper + len_key) * 8)) & (2 ** (len_gcid * 8) - 1)) >> ((len_gcid_upper + len_key) * 8)
+        public_key_client = public_key_client_int.to_bytes(len_public, 'big')
 
-        #秘密鍵の属性をRSAkeyに変換
-        private_key_client = RSA.import_key(private_key_client, passphrase=None)
+        #GCIDから共通鍵を取り出す
+        key_client_int = ((int.from_bytes(GCID, 'big') >> (len_public * 8) << (len_gcid_upper * 8)) & (2 ** ((len_gcid - len_public) * 8) - 1)) >> (len_gcid_upper * 8)
+        key_client = key_client_int.to_bytes(len_key, 'big')
 
-        #秘密鍵でVCIDを開ける
-        #VCIDの暗号文を取得
-        ciphertext_client_int = ((int.from_bytes(VCID, 'big') << (len_vcid_plain * 8)) & (2 ** (len_vcid * 8) - 1)) >> (len_vcid_plain * 8)
-        ciphertext_client = ciphertext_client_int.to_bytes(len_vcid - len_vcid_plain, 'big')
+        #VCIDの暗号文・tag・nonceを取得
+        nonce_int = ((int.from_bytes(VCID, 'big') << ((len_vcid - len_nonce) * 8)) & (2 ** (len_vcid * 8) - 1)) >> ((len_vcid - len_nonce) * 8) 
+        nonce = nonce_int.to_bytes(len_nonce, 'big')
+        
+        tag_int = ((int.from_bytes(VCID, 'big') >> (len_nonce * 8) << ((len_vcid_plain + len_ciphertext) * 8)) & (2 ** ((len_vcid - len_nonce) * 8) - 1)) >> ((len_vcid_plain + len_ciphertext) * 8)
+        tag = tag_int.to_bytes(len_tag, 'big')
+
+        ciphertext_int = ((int.from_bytes(VCID, 'big') >> ((len_nonce + len_tag) * 8) << (len_vcid_plain * 8)) & (2 ** ((len_vcid_plain + len_ciphertext) * 8) - 1)) >> (len_vcid_plain * 8)
+        ciphertext = ciphertext_int.to_bytes(len_ciphertext, 'big')
+        
 
         #VCIDの平文を取得
         vcid_plain_client_int = int.from_bytes(VCID, 'big') >> ((len_vcid - len_vcid_plain) * 8)
         vcid_plain_client = vcid_plain_client_int.to_bytes(len_vcid_plain, 'big')
 
         #復号処理
-        cipher_client = PKCS1_OAEP.new(private_key_client)
-
-        #認証処理
+        #共通鍵を使う
+        cipher = AES.new(key_client, AES.MODE_EAX, nonce=nonce)
+        plaintext = cipher.decrypt(ciphertext)
+        len_plaintext = len(plaintext)
         try:
-            plaintext = cipher_client.decrypt(ciphertext_client)
+            cipher.verify(tag)
+            print("第一段階クリア")
+
+            #署名と元文を取り出す
+            signature_int = ((int.from_bytes(plaintext, 'big') << ((len_vcid_upper + len_sequence) * 8)) & (2 ** (len_plaintext * 8) - 1)) >> ((len_vcid_upper + len_sequence) * 8)
+            signature = signature_int.to_bytes(len_signature, 'big')
+
+            original_int = int.from_bytes(plaintext, 'big') >> (len_signature * 8)
+            original = original_int.to_bytes(len_vcid_upper + len_sequence, 'big')
+
+            #認証
+            h2 = SHA384.new(original)
+            try:
+                pkcs1_15.new(RSA.import_key(public_key_client, passphrase=None)).verify(h2, signature)
+                print("第二段階クリア")
+
+                break
+            except ValueError:
+                print("通報しましょう")
+                break
+
         except ValueError:
             print("認証失敗")
             continue
-        if plaintext == vcid_plain_client:
-                print("Done：認証[{}]".format(i))
-                break
-        else:
-                print("なんらかのerror")
-                break
 
 elapsed_time = time.time() - start
 
